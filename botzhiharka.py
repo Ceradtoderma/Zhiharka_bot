@@ -245,13 +245,15 @@ def weather_day_handler(message):
 
 def millioner_main_handler(message):
     user_id = str(message.from_user.id)
-    count_mil = {'count': 1}
-    data['param'][user_id] = count_mil
-    param_diff = {'qType': message.text}
-    data['param'][user_id].update(param_diff)
-    data['state'][user_id] = MILLIONER_GAME
-    millioner_game_handler(message)
-
+    if message.text == '1' or '2' or '3':
+        count_mil = {'count': 1}
+        data['param'][user_id] = count_mil
+        param_diff = {'qType': message.text}
+        data['param'][user_id].update(param_diff)
+        data['state'][user_id] = MILLIONER_GAME
+        millioner_game_handler(message)
+    else:
+        bot.send_message(user_id, 'Введи число от одного до трех')
 
 def millioner_game_handler(message):
     user_id = str(message.from_user.id)
