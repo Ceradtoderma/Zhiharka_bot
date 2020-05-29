@@ -1,10 +1,7 @@
-import json
 import telebot
 import requests
 import os
 from random import shuffle
-from pprint import pprint
-
 
 #  Переменные
 token = os.environ["TELEGRAM_TOKEN"]
@@ -21,7 +18,6 @@ data = {"state": {"param": {}, "298325596": "choice liter"},
         'password': {}}
 #  Состояния
 MAIN = 'Главное меню'
-
 WEATHER_CITY = 'Меню погоды'
 WEATHER_DAY = 'Погода, выбор дня'
 MILLIONER_MAIN = 'Меню миллионера'
@@ -59,7 +55,6 @@ def command(message):
                          'живут у Андрея. Еще есть две игры - "Викторина" и "Ударения"',
                          reply_markup=keyboard)
         data['state'][user_id] = MAIN
-
 
 
 @bot.message_handler(func=lambda message: True)
@@ -113,10 +108,8 @@ def main_handler(message):
         bot.send_message(user_id, 'Отправь мне букву или напиши "Случайная"', reply_markup=keyboard)
         data['state'][user_id] = ACCENTS_CHOISE
 
-        pprint(data)
     elif message.text == 'Зверушки':
         bot.send_message(user_id, 'Посмотрим на моих зверушек) ')
-        pprint(data)
         if data['password'].get(user_id, 0) == password:
             keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
             keyboard.add('Рэй', 'Бэсси', 'Рикки')
@@ -124,8 +117,6 @@ def main_handler(message):
             bot.send_message(user_id, 'Ты всегда можешь написать "/start", чтобы вернутся в начало')
             data['state'][user_id] = ANIMALS_VIEW
             animals_view_handler(message)
-
-            pprint(data)
         else:
             bot.send_message(user_id, 'Это очень личное, надо бы ввести пароль')
             data['state'][user_id] = ANIMALS_PASS
@@ -141,15 +132,11 @@ def animals_pass_handler(message):
         bot.send_message(user_id, 'Верно! Выбирай:', reply_markup=keyboard)
         bot.send_message(user_id, 'Ты всегда можешь написать "/start", чтобы вернутся в начало')
         data['state'][user_id] = ANIMALS_VIEW
-
     else:
         bot.send_message(user_id, 'Пароль не верный, попробуй ещё')
 
-    pprint(data)
-
 
 def animals_view_handler(message):
-    pprint(data)
     user_id = str(message.from_user.id)
     if message.text == 'Рэй':
         view_photo('Rey.jpg', user_id)
@@ -178,8 +165,6 @@ def accent_choise(message):
 
 
 def accent_handler(message):
-
-    pprint(data)
     user_id = str(message.from_user.id)
     if data['right_answer'][user_id] in message.text:
         keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -188,7 +173,6 @@ def accent_handler(message):
         bot.send_message(user_id, 'Отправь мне букву или выбери "Случайная", для возврата '
                                   'в начало нажми "/start"', reply_markup=keyboard)
         data['state'][user_id] = ACCENTS_CHOISE
-
     else:
         bot.reply_to(message, 'Неправильно!')
 
@@ -219,9 +203,6 @@ def weather_city_handler(message):
         data['state'][user_id] = WEATHER_DAY
     except KeyError:
         bot.send_message(user_id, 'Я не знаю такого города. Подумай лучше')
-    pprint(data['param'])
-
-    print(data)
 
 
 def weather_day_handler(message):
@@ -245,18 +226,21 @@ def weather_day_handler(message):
         clouds = response['daily'][day]['clouds']
         description = response['daily'][day]['weather'][0]['description']
 
-        bot.send_message(user_id, 'Сегодня в городе {} - {}\nУтром: {} ℃\nДнем: {} ℃\n'
+        bot.send_message(user_id, '{} в городе {} - {}\nУтром: {} ℃\nДнем: {} ℃\n'
                                   'Вечером: {} ℃\nНочью: {} ℃\nОщущается как:\nУтром: {} ℃\nДнем: {} ℃\n'
-                                  'Вечером: {} ℃\nНочью: {} ℃\nОблачность {} %\n'.format(data['city'][user_id], description, temp_morn, temp_day,temp_eve, temp_night, feels_like_morn,
-                                                                                         feels_like_day, feels_like_eve,feels_like_night, clouds,
-                                                                                         ))
+                                  'Вечером: {} ℃\nНочью: {} ℃\nОблачность {} %\n'.format(message.text,
+                                                                                         data['city'][user_id],
+                                                                                         description, temp_morn,
+                                                                                         temp_day, temp_eve, temp_night,
+                                                                                         feels_like_morn,
+                                                                                         feels_like_day,
+                                                                                         feels_like_eve,
+                                                                                         feels_like_night,
+                                                                                         clouds))
         bot.send_message(user_id, 'Мы можем посмотреть погоду на другой день. Чтобы вернутся в начало напиши /start')
     except UnboundLocalError:
         bot.send_message(user_id, 'Тебе нужно написать: "Сегодня", "Завтра" или "Послезавтра"\n'
                                   'Чтобы вернутся в начало напиши /start')
-
-
-    print(data)
 
 
 def millioner_main_handler(message):
@@ -268,8 +252,6 @@ def millioner_main_handler(message):
     data['state'][user_id] = MILLIONER_GAME
     millioner_game_handler(message)
 
-    print(data)
-
 
 def millioner_game_handler(message):
     user_id = str(message.from_user.id)
@@ -277,7 +259,6 @@ def millioner_game_handler(message):
     data['question'] = {}
     data['answers'] = {}
     response = requests.get(mill_api, params=data['param'][user_id]).json()
-    pprint(response)
     data['right_answer'][user_id] = response['data'][0]['answers'][0]
     data['question'][user_id] = response['data'][0]['question']
     data['answers'][user_id] = response['data'][0]['answers']
@@ -286,7 +267,6 @@ def millioner_game_handler(message):
     keyboard.add(*data['answers'][user_id])
     bot.send_message(user_id, data['question'][user_id], reply_markup=keyboard)
     data['state'][user_id] = MILLIONER_ANSWER
-
     print('Правильный ответ для {} - {}'.format(message.from_user.first_name, data['right_answer'][user_id]))
 
 
@@ -302,8 +282,6 @@ def millioner_answer_handler(message):
                          reply_markup=keyboard)
     else:
         bot.reply_to(message, 'Неправильно, попробуй еще!')
-
-    pprint(data)
 
 
 bot.polling()
