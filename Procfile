@@ -1,1 +1,1 @@
-bot: python3 botzhiharka.py
+bot: python3 weather.py
