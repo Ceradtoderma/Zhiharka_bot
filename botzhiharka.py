@@ -17,7 +17,8 @@ accent_api = 'https://stepik.akentev.com/api/stress'
 password = '123'
 remove_key = telebot.types.ReplyKeyboardRemove()
 
-data = {"state": {"param": {}, "298325596": "choice liter"}}
+data = {"state": {"param": {}, "298325596": "choice liter"},
+        'password': {}}
 #  Состояния
 MAIN = 'Главное меню'
 
