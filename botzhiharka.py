@@ -11,7 +11,7 @@ weather_api = 'https://api.openweathermap.org/data/2.5/onecall'
 weather_coord = 'http://api.openweathermap.org/data/2.5/weather'
 mill_api = 'https://engine.lifeis.porn/api/millionaire.php'
 accent_api = 'https://stepik.akentev.com/api/stress'
-password = '123'
+password = '0000'
 remove_key = telebot.types.ReplyKeyboardRemove()
 
 data = {"state": {"param": {}, "298325596": "choice liter"},
@@ -25,7 +25,6 @@ MILLIONER_GAME = 'Игра миллионер'
 MILLIONER_ANSWER = 'Ожидание правильного ответа'
 ANIMALS_PASS = 'Авторизация животных'
 ANIMALS_VIEW = 'Показывем фото животных'
-
 ACCENTS = 'Меню ударений'
 ACCENTS_CHOISE = 'Выбор буквы'
 
@@ -245,15 +244,12 @@ def weather_day_handler(message):
 
 def millioner_main_handler(message):
     user_id = str(message.from_user.id)
-    if message.text == '1' or '2' or '3':
-        count_mil = {'count': 1}
-        data['param'][user_id] = count_mil
-        param_diff = {'qType': message.text}
-        data['param'][user_id].update(param_diff)
-        data['state'][user_id] = MILLIONER_GAME
-        millioner_game_handler(message)
-    else:
-        bot.send_message(user_id, 'Введи число от одного до трех')
+    count_mil = {'count': 1}
+    data['param'][user_id] = count_mil
+    param_diff = {'qType': message.text}
+    data['param'][user_id].update(param_diff)
+    data['state'][user_id] = MILLIONER_GAME
+    millioner_game_handler(message)
 
 def millioner_game_handler(message):
     user_id = str(message.from_user.id)
