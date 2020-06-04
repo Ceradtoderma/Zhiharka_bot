@@ -27,6 +27,8 @@ ANIMALS_PASS = 'Авторизация животных'
 ANIMALS_VIEW = 'Показывем фото животных'
 ACCENTS = 'Меню ударений'
 ACCENTS_CHOISE = 'Выбор буквы'
+PRODUCT_MAIN = 'Создание списка продуков'
+PRODUCT_RES = 'Расчет пропорций'
 
 
 #  функции
@@ -48,10 +50,11 @@ def command(message):
         bot.send_message(user_id, 'Начнем сначала')
     if message.text == '/start':
         keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-        keyboard.add('Погода', 'Зверушки', 'Викторина', 'Ударения')
+        keyboard.add('Погода', 'Зверушки', 'Викторина', 'Ударения', 'Пропорции')
         bot.send_message(user_id,
                          'Привет! Начнем? Я умею показывать погоду и фотки зверушек которые '
-                         'живут у Андрея. Еще есть две игры - "Викторина" и "Ударения"',
+                         'живут у Андрея. Могу помочь расчитать пропорции продуктов. '
+                         'Еще есть две игры - "Викторина" и "Ударения"',
                          reply_markup=keyboard)
         data['state'][user_id] = MAIN
 
@@ -80,6 +83,10 @@ def dispatcher(message):
         accent_handler(message)
     elif state == ACCENTS_CHOISE:
         accent_choise(message)
+    elif state == PRODUCT_MAIN:
+        product_main_handler(message)
+    elif state == PRODUCT_RES:
+        product_res_handler(message)
 
 
 def main_handler(message):
@@ -119,6 +126,51 @@ def main_handler(message):
         else:
             bot.send_message(user_id, 'Это очень личное, надо бы ввести пароль')
             data['state'][user_id] = ANIMALS_PASS
+    elif message.text == 'Пропорции':
+        keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+        keyboard.add('Всё')
+        bot.send_message(user_id, 'Расчет продуктов. Вводите в виде: "продукт количство" и отправляй сообщение,'
+                                  ' Когда закончишь, напиши мне "Всё", или нажми соответствующую кнопку',
+                         reply_markup=keyboard)
+        data['state'][user_id] = PRODUCT_MAIN
+        data['prod'] = {}
+        data['prod'][user_id] = {}
+
+
+def product_main_handler(message):
+    user_id = str(message.from_user.id)
+    add = {}
+    if message.text == 'Всё':
+        bot.send_message(user_id, 'Закончили. По какому продукту считаем?')
+        data['state'][user_id] = PRODUCT_RES
+    else:
+        try:
+            add[message.text.split(' ')[0]] = int(message.text.split(' ')[1])
+            data['prod'][user_id].update(add)
+            res = ''
+            for i in data['prod'][user_id]:
+                res += i + ' : ' + str(data['prod'][user_id][i]) + '\n'
+            bot.send_message(user_id, res)
+        except IndexError:
+            bot.send_message(user_id, 'Введите в виде: Назване продукта *пробел* Количество')
+        except ValueError:
+            bot.send_message(user_id, 'После пробела должно быть число!')
+
+
+def product_res_handler(message):
+    user_id = str(message.from_user.id)
+    prod = message.text.split(' ')[0]
+    delta = float(data['prod'][user_id][prod]) / float(message.text.split(' ')[1])
+    for i in data['prod'][user_id]:
+        data['prod'][user_id][i] = float(data['prod'][user_id][i])
+        data['prod'][user_id][i] /= delta
+    res = ''
+    for i in data['prod'][user_id]:
+        res += i + ' : ' + str(int(data['prod'][user_id][i])) + '\n'
+    bot.send_message(user_id, res)
+    data['state'][user_id] = PRODUCT_MAIN
+    bot.send_message(user_id, 'Ты всегда можешь написать "/start", чтобы вернутся в начало')
+    bot.send_message(user_id, 'Расчет продуктов. Вводите в виде: "продукт количство"')
 
 
 def animals_pass_handler(message):
@@ -250,6 +302,7 @@ def millioner_main_handler(message):
     data['param'][user_id].update(param_diff)
     data['state'][user_id] = MILLIONER_GAME
     millioner_game_handler(message)
+
 
 def millioner_game_handler(message):
     user_id = str(message.from_user.id)
